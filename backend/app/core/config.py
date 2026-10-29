@@ -80,6 +80,12 @@ DEFAULT_DEV_CORS_ORIGINS = (
     "http://127.0.0.1:4176",
 )
 
+DEFAULT_PRODUCTION_CORS_ORIGINS = (
+    "https://costiqo.netlify.app",
+    "https://costiqo.com",
+    "https://www.costiqo.com",
+)
+
 
 def normalize_database_url(raw_url: str | None) -> str:
     """Normalize PostgreSQL URLs to use the psycopg driver and preserve SQLite."""
@@ -252,8 +258,14 @@ class Settings(BaseSettings):
     def cors_origins(self) -> list[str]:
         configured = self._split_csv(self.cors_origins_raw)
         origins: list[str] = []
-        for origin in [*DEFAULT_DEV_CORS_ORIGINS, *configured]:
-            if origin not in origins:
+        base_origins = [
+            *DEFAULT_DEV_CORS_ORIGINS,
+            *DEFAULT_PRODUCTION_CORS_ORIGINS,
+            *configured,
+        ]
+        for raw_origin in base_origins:
+            origin = raw_origin.strip().rstrip("/")
+            if origin and origin not in origins:
                 origins.append(origin)
         return origins
 

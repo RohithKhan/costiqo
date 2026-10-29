@@ -73,7 +73,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             self._requests.pop(key, None)
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        if request.url.path in {"/", "/health"}:
+        if request.method == "OPTIONS" or request.url.path in {"/", "/health"}:
             return await call_next(request)
 
         now = time.monotonic()

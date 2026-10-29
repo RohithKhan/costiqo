@@ -11,6 +11,18 @@ def test_cors_origins_always_include_local_dev_defaults():
         assert f"http://localhost:{port}" in settings.cors_origins
         assert f"http://127.0.0.1:{port}" in settings.cors_origins
     assert "https://costiqo.vercel.app" in settings.cors_origins
+    assert "https://costiqo.netlify.app" in settings.cors_origins
+
+
+def test_cors_origins_strips_trailing_slashes():
+    settings = Settings(
+        cors_origins_raw="https://costiqo.netlify.app/, https://example.com/ ",
+        database_url="sqlite:///./test.db",
+    )
+    assert "https://costiqo.netlify.app" in settings.cors_origins
+    assert "https://costiqo.netlify.app/" not in settings.cors_origins
+    assert "https://example.com" in settings.cors_origins
+    assert "https://example.com/" not in settings.cors_origins
 
 
 def test_trusted_vendor_domains_include_observed_live_merchants():
