@@ -1,0 +1,162 @@
+services:
+  - type: web
+    name: costiqo-api
+    runtime: docker
+    plan: starter
+    region: singapore
+    rootDir: backend
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile.api
+    dockerCommand: /bin/sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: AUTO_CREATE_SCHEMA
+        value: "false"
+      - key: BOOTSTRAP_VENDORS_ON_STARTUP
+        value: "true"
+      - key: ENABLED_SOURCES_RAW
+        value: shopping-provider,amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics
+      - key: PRIMARY_SOURCES_RAW
+        value: shopping-provider,moglix,robu,electronicscomp,ibo,global-electronics,amazon
+      - key: BACKGROUND_SOURCES_RAW
+        value: amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics
+      - key: SHOPPING_PROVIDER_BACKEND
+        value: serper
+      - key: SHOPPING_PROVIDER_LOCATION
+        value: India
+      - key: SHOPPING_PROVIDER_GL
+        value: in
+      - key: SHOPPING_PROVIDER_HL
+        value: en
+      - key: SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS
+        value: "false"
+      - key: QUEUE_BACKEND
+        value: rq
+      - key: QUEUE_NAME
+        value: costiqo-scrape
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS
+        value: "240"
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: "60"
+      - key: NEON_DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: CORS_ORIGINS_RAW
+        sync: false
+      - key: SHOPPING_PROVIDER_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: SEARCHAPI_API_KEY
+        sync: false
+
+  - type: worker
+    name: costiqo-worker
+    runtime: docker
+    plan: starter
+    region: singapore
+    rootDir: backend
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: python -m app.worker
+    autoDeployTrigger: commit
+    maxShutdownDelaySeconds: 120
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: AUTO_CREATE_SCHEMA
+        value: "false"
+      - key: BOOTSTRAP_VENDORS_ON_STARTUP
+        value: "true"
+      - key: ENABLED_SOURCES_RAW
+        value: shopping-provider,amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics
+      - key: PRIMARY_SOURCES_RAW
+        value: shopping-provider,moglix,robu,electronicscomp,ibo,global-electronics,amazon
+      - key: BACKGROUND_SOURCES_RAW
+        value: amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics
+      - key: SHOPPING_PROVIDER_BACKEND
+        value: serper
+      - key: SHOPPING_PROVIDER_LOCATION
+        value: India
+      - key: SHOPPING_PROVIDER_GL
+        value: in
+      - key: SHOPPING_PROVIDER_HL
+        value: en
+      - key: SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS
+        value: "false"
+      - key: QUEUE_BACKEND
+        value: rq
+      - key: QUEUE_NAME
+        value: costiqo-scrape
+      - key: NEON_DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: SHOPPING_PROVIDER_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: SEARCHAPI_API_KEY
+        sync: false
+
+  - type: cron
+    name: costiqo-refresh
+    runtime: docker
+    plan: starter
+    region: singapore
+    rootDir: backend
+    schedule: "*/30 * * * *"
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: python -m app.scripts.refresh_catalog
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: AUTO_CREATE_SCHEMA
+        value: "false"
+      - key: BOOTSTRAP_VENDORS_ON_STARTUP
+        value: "false"
+      - key: ENABLED_SOURCES_RAW
+        value: shopping-provider,amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics
+      - key: PRIMARY_SOURCES_RAW
+        value: shopping-provider,moglix,robu,electronicscomp,ibo,global-electronics,amazon
+      - key: BACKGROUND_SOURCES_RAW
+        value: amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics
+      - key: SHOPPING_PROVIDER_BACKEND
+        value: serper
+      - key: SHOPPING_PROVIDER_LOCATION
+        value: India
+      - key: SHOPPING_PROVIDER_GL
+        value: in
+      - key: SHOPPING_PROVIDER_HL
+        value: en
+      - key: SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS
+        value: "false"
+      - key: QUEUE_BACKEND
+        value: rq
+      - key: QUEUE_NAME
+        value: costiqo-scrape
+      - key: SCHEDULED_REFRESH_LIMIT
+        value: "25"
+      - key: NEON_DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: SHOPPING_PROVIDER_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: SEARCHAPI_API_KEY
+        sync: false

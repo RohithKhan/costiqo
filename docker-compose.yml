@@ -1,0 +1,102 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: costiqo
+      POSTGRES_USER: costiqo
+      POSTGRES_PASSWORD: costiqo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U costiqo -d costiqo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://costiqo:costiqo@db:5432/costiqo
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_BACKEND: ${QUEUE_BACKEND:-rq}
+      AUTO_CREATE_SCHEMA: "true"
+      BOOTSTRAP_VENDORS_ON_STARTUP: "true"
+      ENABLED_SOURCES_RAW: ${ENABLED_SOURCES_RAW:-shopping-provider,amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics}
+      PRIMARY_SOURCES_RAW: ${PRIMARY_SOURCES_RAW:-}
+      BACKGROUND_SOURCES_RAW: ${BACKGROUND_SOURCES_RAW:-}
+      SHOPPING_PROVIDER_BACKEND: ${SHOPPING_PROVIDER_BACKEND:-}
+      SHOPPING_PROVIDER_API_KEY: ${SHOPPING_PROVIDER_API_KEY:-}
+      SHOPPING_PROVIDER_LOCATION: ${SHOPPING_PROVIDER_LOCATION:-India}
+      SHOPPING_PROVIDER_GL: ${SHOPPING_PROVIDER_GL:-in}
+      SHOPPING_PROVIDER_HL: ${SHOPPING_PROVIDER_HL:-en}
+      SHOPPING_PROVIDER_TIMEOUT_SECONDS: ${SHOPPING_PROVIDER_TIMEOUT_SECONDS:-90}
+      SHOPPING_PROVIDER_MAX_PRODUCTS: ${SHOPPING_PROVIDER_MAX_PRODUCTS:-3}
+      SHOPPING_PROVIDER_MAX_OFFER_PAGES: ${SHOPPING_PROVIDER_MAX_OFFER_PAGES:-1}
+      SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS: ${SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS:-false}
+      SHOPPING_PROVIDER_ALLOWED_DOMAINS_RAW: ${SHOPPING_PROVIDER_ALLOWED_DOMAINS_RAW:-amazon.in,flipkart.com,meesho.com,myntra.com,ajio.com,tatacliq.com,croma.com,reliancedigital.in,vijaysales.com,jiomart.com,bigbasket.com,nykaa.com,firstcry.com,snapdeal.com,shopclues.com,samsung.com,mi.com,oneplus.in,apple.com,myimaginestore.com,cashify.in,pepperfry.com,dell.com,hp.com,lenovo.com,asus.com,acer.com,msi.com,lg.com,sony.co.in,panasonic.com,vivo.com,oppo.com,realme.com,motorola.in,nothing.tech,honor.com,infinixmobiles.in,tecno-mobile.in,tcl.com,hisense-india.com,boat-lifestyle.com,moglix.com,robu.in,ibo.com,globalelectronics.in,electronicscomp.com}
+      SEARCHAPI_API_KEY: ${SEARCHAPI_API_KEY:-}
+      SERPER_API_KEY: ${SERPER_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://costiqo:costiqo@db:5432/costiqo
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_BACKEND: ${QUEUE_BACKEND:-rq}
+      AUTO_CREATE_SCHEMA: "true"
+      BOOTSTRAP_VENDORS_ON_STARTUP: "true"
+      ENABLED_SOURCES_RAW: ${ENABLED_SOURCES_RAW:-shopping-provider,amazon,flipkart,meesho,poorvika,reliance-digital,croma,moglix,robu,electronicscomp,ibo,global-electronics}
+      PRIMARY_SOURCES_RAW: ${PRIMARY_SOURCES_RAW:-}
+      BACKGROUND_SOURCES_RAW: ${BACKGROUND_SOURCES_RAW:-}
+      SHOPPING_PROVIDER_BACKEND: ${SHOPPING_PROVIDER_BACKEND:-}
+      SHOPPING_PROVIDER_API_KEY: ${SHOPPING_PROVIDER_API_KEY:-}
+      SHOPPING_PROVIDER_LOCATION: ${SHOPPING_PROVIDER_LOCATION:-India}
+      SHOPPING_PROVIDER_GL: ${SHOPPING_PROVIDER_GL:-in}
+      SHOPPING_PROVIDER_HL: ${SHOPPING_PROVIDER_HL:-en}
+      SHOPPING_PROVIDER_TIMEOUT_SECONDS: ${SHOPPING_PROVIDER_TIMEOUT_SECONDS:-90}
+      SHOPPING_PROVIDER_MAX_PRODUCTS: ${SHOPPING_PROVIDER_MAX_PRODUCTS:-3}
+      SHOPPING_PROVIDER_MAX_OFFER_PAGES: ${SHOPPING_PROVIDER_MAX_OFFER_PAGES:-1}
+      SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS: ${SHOPPING_PROVIDER_ENFORCE_ALLOWED_DOMAINS:-false}
+      SHOPPING_PROVIDER_ALLOWED_DOMAINS_RAW: ${SHOPPING_PROVIDER_ALLOWED_DOMAINS_RAW:-amazon.in,flipkart.com,meesho.com,myntra.com,ajio.com,tatacliq.com,croma.com,reliancedigital.in,vijaysales.com,jiomart.com,bigbasket.com,nykaa.com,firstcry.com,snapdeal.com,shopclues.com,samsung.com,mi.com,oneplus.in,apple.com,myimaginestore.com,cashify.in,pepperfry.com,dell.com,hp.com,lenovo.com,asus.com,acer.com,msi.com,lg.com,sony.co.in,panasonic.com,vivo.com,oppo.com,realme.com,motorola.in,nothing.tech,honor.com,infinixmobiles.in,tecno-mobile.in,tcl.com,hisense-india.com,boat-lifestyle.com,moglix.com,robu.in,ibo.com,globalelectronics.in,electronicscomp.com}
+      SEARCHAPI_API_KEY: ${SEARCHAPI_API_KEY:-}
+      SERPER_API_KEY: ${SERPER_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8000/api/v1
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:

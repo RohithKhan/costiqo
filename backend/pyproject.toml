@@ -1,0 +1,42 @@
+[project]
+name = "costiqo-backend"
+version = "0.1.0"
+description = "API-first backend for the Costiqo smart price benchmarking platform"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0,<1.0.0",
+  "playwright>=1.56.0,<1.57.0",
+  "uvicorn[standard]>=0.32.0,<1.0.0",
+  "sqlalchemy>=2.0.36,<3.0.0",
+  "alembic>=1.13.3,<2.0.0",
+  "pydantic-settings>=2.6.0,<3.0.0",
+  "psycopg[binary]>=3.2.3,<4.0.0",
+  "pymysql>=1.1.1,<2.0.0",
+  "redis>=5.2.0,<6.0.0",
+  "rq>=1.16.2,<2.0.0",
+  "email-validator>=2.2.0,<3.0.0",
+  "certifi>=2024.8.30,<2027.0.0",
+  "httpx>=0.28.0,<1.0.0",
+  "python-jose[cryptography]>=3.3.0,<4.0.0",
+  "argon2-cffi>=23.1.0,<24.0.0",
+  "vaderSentiment>=3.3.2,<4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0,<9.0.0",
+  "pytest-asyncio>=0.24.0,<2.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

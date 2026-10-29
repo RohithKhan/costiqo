@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Costiqo — Smart Price Comparison & Multi-Store Deal Discovery</title>
+    <link rel="icon" type="image/png" href="/costiqo-logo.png" />
+    <link rel="apple-touch-icon" href="/costiqo-logo.png" />
+    <meta
+      name="description"
+      content="Compare live product prices across Amazon, Flipkart, Croma, Reliance Digital, Robu, and more. Find verified in-stock deals, accurate landed prices, and local delivery estimates."
+    />
+    <meta name="keywords" content="price comparison, compare product prices, online deals, electronics price comparison, buyhatke alternative, Costiqo" />
+    <link rel="canonical" href="https://costiqo.com/" />
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://costiqo.com/" />
+    <meta property="og:title" content="Costiqo — Smart Price Comparison & Deal Discovery" />
+    <meta
+      property="og:description"
+      content="Compare live product prices across leading Indian online stores with real-time stock verification and delivery estimates."
+    />
+    <meta property="og:site_name" content="Costiqo" />
+    <meta property="og:image" content="https://costiqo.com/costiqo-logo.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" content="https://costiqo.com/costiqo-logo.png" />
+    <meta name="twitter:title" content="Costiqo — Smart Price Comparison" />
+    <meta
+      name="twitter:description"
+      content="Compare live product prices across Amazon, Flipkart, Croma, and more."
+    />
+
+    <!-- Fonts & Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured Data: Organization & WebSite -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://costiqo.com/#website",
+            "url": "https://costiqo.com/",
+            "name": "Costiqo",
+            "description": "Multi-store price comparison and verified deal discovery engine",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://costiqo.com/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://costiqo.com/#organization",
+            "name": "Costiqo",
+            "url": "https://costiqo.com/",
+            "logo": "https://costiqo.com/costiqo-logo.png"
+          }
+        ]
+      }
+    </script>
+
+    <style>
+      html,
+      body,
+      #root {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: #faf8f5;
+      }
+
+      .boot-screen {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        color: #38000a;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot-screen">Costiqo</div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+  </html>

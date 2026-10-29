@@ -1,0 +1,50 @@
+# OS and editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Logs and runtime files
+*.log
+*.pid
+.run-logs/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+backend/.venv/
+backend/build/
+backend/dist/
+backend/*.egg-info/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+backend/costiqo.db
+backend/local-dev.db
+
+# Node and frontend builds
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/vite.config.d.ts
+frontend/vite.config.js
+*.tsbuildinfo
+
+# Generated artifacts and local scratch files
+*.zip
+.playwright-mcp/
+client_req/
+hifi-prototype.html
