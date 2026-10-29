@@ -48,3 +48,4 @@ frontend/vite.config.js
 .playwright-mcp/
 client_req/
 hifi-prototype.html
+.neon

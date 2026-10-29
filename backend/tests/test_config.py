@@ -75,3 +75,47 @@ def test_development_and_test_allow_default_secret():
     )
     assert test_settings.secret_key == "change-me-before-production"
 
+
+def test_normalize_database_url_converts_postgres_prefixes_and_preserves_sqlite():
+    from app.core.config import normalize_database_url
+
+    assert normalize_database_url("postgres://u:p@host/db") == "postgresql+psycopg://u:p@host/db"
+    assert normalize_database_url("postgresql://u:p@host/db") == "postgresql+psycopg://u:p@host/db"
+    assert normalize_database_url("sqlite:///./costiqo.db") == "sqlite:///./costiqo.db"
+    assert normalize_database_url("") == ""
+    assert normalize_database_url(None) == ""
+
+
+def test_neon_unpooled_url_used_for_migrations_only():
+    settings = Settings(
+        database_url="postgresql://user:pass@ep-pooler.neon.tech/db?sslmode=require",
+        database_url_unpooled="postgresql://user:pass@ep-direct.neon.tech/db?sslmode=require",
+        neon_branch="production",
+    )
+
+    assert "ep-pooler.neon.tech" in settings.active_database_url
+    assert settings.active_database_url.startswith("postgresql+psycopg://")
+    assert "ep-direct.neon.tech" in settings.active_migration_database_url
+    assert settings.active_migration_database_url.startswith("postgresql+psycopg://")
+    assert settings.neon_branch == "production"
+
+
+def test_production_disables_auto_create_schema_on_postgres():
+    settings = Settings(
+        environment="production",
+        secret_key="x" * 32,
+        database_url="postgresql+psycopg://user:pass@ep-pooler.neon.tech/db?sslmode=require",
+        auto_create_schema=True,
+    )
+    assert settings.effective_auto_create_schema is False
+
+
+def test_development_allows_auto_create_schema():
+    settings = Settings(
+        environment="development",
+        auto_create_schema=True,
+    )
+    assert settings.effective_auto_create_schema is True
+
+
+

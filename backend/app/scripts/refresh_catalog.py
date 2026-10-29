@@ -19,7 +19,7 @@ def main() -> None:
         max_overflow=settings.database_max_overflow,
         pool_recycle_seconds=settings.database_pool_recycle_seconds,
     )
-    if settings.auto_create_schema:
+    if settings.effective_auto_create_schema:
         init_db()
 
     refresh_location = (

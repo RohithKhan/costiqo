@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.core.config import get_settings
+from app.core.config import get_settings, normalize_database_url
 from app.db.base import Base
 
 
@@ -22,12 +22,13 @@ def configure_session(
 ) -> Engine:
     global engine, SessionLocal
 
-    connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
+    normalized_url = normalize_database_url(database_url)
+    connect_args = {"check_same_thread": False} if normalized_url.startswith("sqlite") else {}
     engine_kwargs = {
         "future": True,
         "connect_args": connect_args,
     }
-    if not database_url.startswith("sqlite"):
+    if not normalized_url.startswith("sqlite"):
         engine_kwargs.update(
             {
                 "pool_pre_ping": True,
@@ -36,7 +37,7 @@ def configure_session(
                 "pool_recycle": pool_recycle_seconds,
             }
         )
-    engine = create_engine(database_url, **engine_kwargs)
+    engine = create_engine(normalized_url, **engine_kwargs)
     SessionLocal = sessionmaker(
         bind=engine,
         autoflush=False,

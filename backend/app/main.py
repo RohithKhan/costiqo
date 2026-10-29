@@ -26,7 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             max_overflow=active_settings.database_max_overflow,
             pool_recycle_seconds=active_settings.database_pool_recycle_seconds,
         )
-        if active_settings.auto_create_schema:
+        if active_settings.effective_auto_create_schema:
             init_db()
         if active_settings.bootstrap_vendors_on_startup:
             with session_scope() as db:

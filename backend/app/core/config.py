@@ -81,6 +81,18 @@ DEFAULT_DEV_CORS_ORIGINS = (
 )
 
 
+def normalize_database_url(raw_url: str | None) -> str:
+    """Normalize PostgreSQL URLs to use the psycopg driver and preserve SQLite."""
+    if not raw_url:
+        return ""
+    stripped = raw_url.strip()
+    if stripped.startswith("postgres://"):
+        return "postgresql+psycopg://" + stripped[len("postgres://"):]
+    if stripped.startswith("postgresql://"):
+        return "postgresql+psycopg://" + stripped[len("postgresql://"):]
+    return stripped
+
+
 class Settings(BaseSettings):
     app_name: str = "Costiqo API"
     api_v1_prefix: str = "/api/v1"
@@ -89,6 +101,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60 * 24
     database_url: str = "sqlite:///./costiqo.db"
     neon_database_url: str | None = None
+    database_url_unpooled: str | None = None
+    neon_branch: str | None = None
     database_pool_size: int = 5
     database_max_overflow: int = 10
     database_pool_recycle_seconds: int = 1800
@@ -132,7 +146,12 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
 
     model_config = SettingsConfigDict(
-        env_file=("../.env", ".env"),
+        env_file=(
+            "../.env.local",
+            ".env.local",
+            "../.env",
+            ".env",
+        ),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -164,12 +183,30 @@ class Settings(BaseSettings):
     @property
     def active_database_url(self) -> str:
         if self.environment.lower() == "test":
-            return self.database_url
-        return self.neon_database_url or self.database_url
+            return normalize_database_url(self.database_url)
+        raw_url = self.neon_database_url or self.database_url
+        return normalize_database_url(raw_url)
+
+    @property
+    def active_migration_database_url(self) -> str:
+        if self.environment.lower() == "test":
+            return normalize_database_url(self.database_url)
+        raw_url = (
+            self.database_url_unpooled
+            or self.neon_database_url
+            or self.database_url
+        )
+        return normalize_database_url(raw_url)
 
     @property
     def is_sqlite(self) -> bool:
         return self.active_database_url.startswith("sqlite")
+
+    @property
+    def effective_auto_create_schema(self) -> bool:
+        if self.environment.strip().lower() not in {"development", "test"} and not self.is_sqlite:
+            return False
+        return self.auto_create_schema
 
     @property
     def effective_rate_limit_enabled(self) -> bool:
